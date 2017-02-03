@@ -1,0 +1,33 @@
+nav {
+    margin-top: 10px;
+    border-bottom: 10px solid #fb0;
+}
+
+nav #proxy-logo {
+    max-width: 200px;
+}
+
+nav #proxy-logo img {
+    width: 100%;
+}
+
+nav #proxy-text {
+    text-align: center;
+}
+
+nav #proxy-text > ul > li + li {
+    color: #428bca;
+}
+
+nav #proxy-options > ul > li {
+    padding-bottom: 1px;
+}
+
+nav #proxy-options > ul > li > a {
+    display: block;
+}
+
+#site-proxy-iframe {
+    border: 0;
+    width: 100%;
+}

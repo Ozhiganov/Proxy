@@ -36,7 +36,17 @@
 		</nav>
 		<div class ="container-fluid">
 		</div>
-		<iframe id="site-proxy-iframe" src="{!!$iframeUrl!!}" >
+		<iframe
+			id="site-proxy-iframe"
+			src="{!!$iframeUrl!!}"
+			sandbox="
+			allow-forms
+			allow-popups
+			allow-top-navigation
+			allow-same-origin
+			allow-scripts
+			"
+			 >
 
 		</iframe>
 		<script src="/js/jquery.min.js"></script>

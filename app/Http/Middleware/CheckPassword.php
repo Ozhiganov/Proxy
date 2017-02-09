@@ -23,7 +23,8 @@ class CheckPassword
                 return $next($request);
             }
         } else {
-            $targetUrl = str_rot13(base64_decode($request->route('url')));
+            $targetUrl = str_replace("<<SLASH>>", "/", $request->route('url'));
+            $targetUrl = str_rot13(base64_decode($targetUrl));
             // Check Password:
             $checkPw  = md5(env('PROXY_PASSWORD') . $targetUrl);
             $password = $request->route('password');

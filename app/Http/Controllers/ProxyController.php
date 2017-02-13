@@ -102,10 +102,12 @@ class ProxyController extends Controller
     {
         $targetUrl = str_replace("<<SLASH>>", "/", $url);
         $targetUrl = str_rot13(base64_decode($targetUrl));
+        $this->password = $password;
         // Hash Value under which a possible cached file would've been stored
         $hash     = md5($targetUrl);
         $result   = [];
         $httpcode = 200;
+
         if (!Cache::has($hash) || 1 == 1) {
             // Inits the Curl connection for being able to preload multiple URLs while using a keep-alive connection
             $this->initCurl();
@@ -126,16 +128,34 @@ class ProxyController extends Controller
             }
 
             extract(parse_url($targetUrl));
-            $base = $scheme . "://" . $host;
+            $this->base = $scheme . "://" . $host;
             if (isset($path)) {
-                $base .= $path;
+                $this->base .= $path;
             }
-
-            $result["data"] = $this->parseRelativeToAbsolute($result["data"], $base);
             if (isset($result["header"]["Content-Type"]) && stripos($result["header"]["Content-Type"], "text/html") !== false) {
                 $result["data"] = $this->convertTargetAttributes($result["data"]);
             }
-            $result["data"] = $this->parseProxyLink($result["data"], $password, $request);
+            // We define the "tag" that encloses possible URLS that are needed to be parsed
+            // Every tag is seperated by a "|" and needs to be regexp escaped
+            $tagsToMatch = "href=|src=|action=|background=";
+            // We have to match all Links enclosed within Quotes
+            $result["data"] = preg_replace_callback("/(<[^>]+)($tagsToMatch)\s*([\"\'])((?!\\\\3).*?)(\\3.*?>)/si", "self::regRel2AbsQuotes", $result["data"]);
+            // Ommitting Quotes is valid too so we match all Links matching this here
+            $result["data"] = preg_replace_callback("/(<[^>]+?)($tagsToMatch)([^\"\'\s][^\s\"\/>]*?)(\s[^>]+?>|>)/si", "self::regRel2AbsNoQuotes", $result["data"]);
+            // srcsets can contain multiple URLs so we handle them here srcset=
+            $result["data"] = preg_replace_callback("/(<[^>]+)(srcset=)\s*([\"\'])((?!\\\\3).*?)(\\3.*?>)/s", "self::regRel2AbsSrcSet", $result["data"]);
+
+            if (isset($result["header"]["Content-Type"]) && stripos($result["header"]["Content-Type"], "text/css") !== false) {
+                // You can define resources in your css files that will make the browser load that resources
+                // We need to Proxify them, too.
+                // Option one url(...)
+                $result["data"] = preg_replace_callback("/(url\(\s*)([^\)]*?)(\))/si", "self::regCssRel2Abs", $result["data"]);
+            }
+
+            // Now we need replace all of the absolute Links
+            // We have to distinct whether the target of the Link is _blank|_top or not
+
+            #$result["data"] = $this->parseProxyLink($result["data"], $password, $request);
             curl_close($this->ch);
 
             # We are gonna cache all files for 60 Minutes to reduce
@@ -204,12 +224,103 @@ class ProxyController extends Controller
         return $string;
     }
 
-    private function parseRelativeToAbsolute($data, $base)
-    {
-        $result = $data;
-        $count  = 1;
+    private function regRel2AbsNoQuotes($match){
+        $top = false;
+        if(preg_match("/target=[\"\']{0,1}\s*(_blank|_top)/si", $match[0]) === 1){
+            $top = true;
+        }
+        
+        $pre = $match[1] . $match[2];
+        $post = $match[4];
+        $link = $match[3];
 
-        # Convert every Link that starts with [ . | / ] but not  with [ // ]
+        $link = $this->parseRelativeToAbsolute($link);
+
+        // We will Proxify this URL
+        $link = $this->proxifyUrl($link, $this->password, $top);
+        return $pre . $link . $post;
+    }
+
+    private function regRel2AbsQuotes($match){
+        $top = false;
+        if(preg_match("/target=[\"\']{0,1}\s*(_blank|_top)/si", $match[0]) === 1){
+            $top = true;
+        }
+
+        $pre = $match[1] . $match[2] . $match[3];
+        $post = $match[5];
+        $link = htmlspecialchars_decode($match[4]);
+
+        $link = $this->parseRelativeToAbsolute($link);
+
+        // We will Proxify this URL
+        $link = $this->proxifyUrl($link, $this->password, $top);
+        return $pre . $link . $post;
+    }
+
+    private function regCssRel2Abs($match){
+        $top = false;
+        $pre = $match[1];
+        $post = $match[3];
+        $link = htmlspecialchars_decode($match[2]);
+
+        $link = $this->parseRelativeToAbsolute($link);
+        if(strpos($link, "data:") !== 0){
+          #  die($link);
+        }
+        // We will Proxify this URL
+        $link = $this->proxifyUrl($link, $this->password, $top);
+
+        return $pre . $link . $post;
+    }
+
+    private function regRel2AbsSrcSet($match){
+        $top = false;
+        if(preg_match("/target=[\"\']{0,1}\s*(_blank|_top)/si", $match[0]) === 1){
+            $top = true;
+        }
+
+        $pre = $match[1] . $match[2] . $match[3];
+        $post = $match[5];
+
+        $links = explode(",", $match[4]);
+        $result = $match[4];
+        foreach($links as $link){
+            preg_match_all("/[\S]+/", $link, $matches);
+            if(isset($matches[0]) && isset($matches[0][0])){
+                // In the srcset the Link would be the first match
+                $rel = $matches[0][0];
+                $absLink = $this->parseRelativeToAbsolute($rel, "", $rel, "");
+
+                // We will Proxify this URL
+                $absLink = $this->proxifyUrl($absLink, $this->password, $top);
+
+                $result = str_replace($rel, $absLink, $result);
+            }
+        }
+        return $pre . $result . $post;
+    }
+
+    private function parseRelativeToAbsolute($link)
+    {
+        // When the Link is already absolute then do not convert anything
+        if(preg_match("/(?:(?!:\/\/).)+?:\/\//si", $link) === 1){
+            return $link;
+        // If the Link starts with "//" that means it already is an absolute Link
+        // But it needs to get the current protocol added
+        }elseif (preg_match("/^\s*?\/\//si", $link) === 1) {
+            $scheme = parse_url($this->base)["scheme"] . "://";
+            $abs = preg_replace("/^\s*?\/\//si", "$scheme", $link);
+            return $abs;
+        // The Link that is following here is not absolute. But it can be invalid:
+        }else{
+            $absLink = $this->rel2abs($link, $this->base);
+            return $absLink;
+        }
+
+        # Convert every Link that starts with [ . | / ] but not  with [ // ]        
+
+        
         while (preg_match("/(href=|src=|url\(|action=|srcset=|@import |background=)(\s*[\"\']{0,1}\s*)((:?\.|\/[^\/])[^\"\'\s]+)([\"\'\s])/si", $result, $matches) === 1) {
             $absoluteLink = $this->rel2abs($matches[3], $base);
             $result       = str_replace($matches[0], $matches[1] . $matches[2] . $absoluteLink . $matches[5], $result, $count);
@@ -281,6 +392,8 @@ class ProxyController extends Controller
     {
         $this->ch = curl_init();
         curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; .NET CLR 1.1.4322)');
+        curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
+        curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 5);
         curl_setopt($this->ch, CURLOPT_TIMEOUT, 5);
@@ -289,10 +402,10 @@ class ProxyController extends Controller
 
     private function getUrlContent($url, $withCookies)
     {
+        $url = htmlspecialchars_decode($url);
         curl_setopt($this->ch, CURLOPT_URL, "$url");
 
         $data = curl_exec($this->ch);
-        die(htmlspecialchars_decode($url));
         $httpcode = intval(curl_getinfo($this->ch, CURLINFO_HTTP_CODE));
 
         $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
@@ -342,6 +455,13 @@ class ProxyController extends Controller
 
     public function proxifyUrl($url, $password = null, $topLevel)
     {
+        // Only convert valid URLs
+        $url = trim($url);
+        if(strpos($url, "http") !== 0){
+            return $url;
+        }
+
+
         if (!$password) {
             $password = urlencode(\Request::route('password'));
         }

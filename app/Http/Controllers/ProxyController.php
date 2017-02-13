@@ -135,6 +135,10 @@ class ProxyController extends Controller
             if (isset($result["header"]["Content-Type"]) && stripos($result["header"]["Content-Type"], "text/html") !== false) {
                 $result["data"] = $this->convertTargetAttributes($result["data"]);
             }
+            // First of all we will handle the URLs in the META refresh tag
+            /*die(var_dump($result["data"]));
+            $result["data"] = preg_replace_callback("/(<meta\b[^>]*?url=)([^\s\"\']*)([^>]*?>)/si", "self::regRel2AbsMeta", $result["data"]);
+            die("test");*/
             // We define the "tag" that encloses possible URLS that are needed to be parsed
             // Every tag is seperated by a "|" and needs to be regexp escaped
             $tagsToMatch = "href=|src=|action=|background=";
@@ -145,12 +149,10 @@ class ProxyController extends Controller
             // srcsets can contain multiple URLs so we handle them here srcset=
             $result["data"] = preg_replace_callback("/(<[^>]+)(srcset=)\s*([\"\'])((?!\\\\3).*?)(\\3.*?>)/s", "self::regRel2AbsSrcSet", $result["data"]);
 
-            if (isset($result["header"]["Content-Type"]) && stripos($result["header"]["Content-Type"], "text/css") !== false) {
-                // You can define resources in your css files that will make the browser load that resources
-                // We need to Proxify them, too.
-                // Option one url(...)
-                $result["data"] = preg_replace_callback("/(url\(\s*)([^\)]*?)(\))/si", "self::regCssRel2Abs", $result["data"]);
-            }
+            // You can define resources in your css files that will make the browser load that resources
+            // We need to Proxify them, too.
+            // Option one url(...)
+            $result["data"] = preg_replace_callback("/(url\(\s*[\"\']{0,1})([^\'\"\)]*?)([\"\']{0,1}\))/si", "self::regCssRel2Abs", $result["data"]);
 
             // Now we need replace all of the absolute Links
             // We have to distinct whether the target of the Link is _blank|_top or not
@@ -201,9 +203,9 @@ class ProxyController extends Controller
         // we cannot guarantee so we will use regex
         $result = $html;
         // We will simply remove every single script tag and it's contents
-        $result = preg_replace("/<[\s]*script.*?(:?\/\s*>|<\s*\/\s*script\s*>)/si", "", $result);
+        $result = preg_replace("/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/i", "", $result);
         # Remove all Javascript that is placed in a href
-        $result = preg_replace('/(href=)(["\'])\s*javascript:[^\2]*?(\2)/si', "$1$2$3", $result);
+        $result = preg_replace('/(href=)(["\'])\s*javascript:[^\\2]*?(\\2)/si', "$1$2$3", $result);
         # Remove all HTMl Event Handler
         $result = preg_replace_callback("/<[^>]*?\bon[^=]+?=([\"\']).*?\\1[^>]*?>/si", "self::removeJsAttributes", $result);
         # Remove all autofocus attributes:
@@ -222,6 +224,10 @@ class ProxyController extends Controller
 
         $string = preg_replace("/\bon[^=]+?=\s*([\"\']).*?\\1/si", "", $string);
         return $string;
+    }
+
+    private function regRel2AbsMeta($match){
+        die(var_dump($match));
     }
 
     private function regRel2AbsNoQuotes($match){
@@ -396,7 +402,7 @@ class ProxyController extends Controller
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($this->ch, CURLOPT_CONNECTTIMEOUT, 5);
-        curl_setopt($this->ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($this->ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($this->ch, CURLOPT_HEADER, 1);
     }
 
@@ -497,8 +503,9 @@ class ProxyController extends Controller
 
     private function rel2abs($rel, $base)
     {
+
         /* return if already absolute URL */
-        if (parse_url($rel, PHP_URL_SCHEME) != '') {
+        if (parse_url($rel, PHP_URL_SCHEME) != '' || strlen(trim($rel)) <= 0 ) {
             return ($rel);
         }
 

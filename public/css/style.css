@@ -1,4 +1,5 @@
 nav {
+    height: 100px;
     margin-top: 10px;
     border-bottom: 10px solid #fb0;
 }
@@ -30,4 +31,5 @@ nav #proxy-options > ul > li > a {
 #site-proxy-iframe {
     border: 0;
     width: 100%;
+    height: calc(100% - 110px);
 }

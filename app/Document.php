@@ -21,6 +21,11 @@ abstract class Document
     {
         // Only convert valid URLs
         $url = trim($url);
+
+        if (stripos($url, "javascript:") === 0) {
+            return "";
+        }
+
         if (strpos($url, "http") !== 0 || strpos($url, URL::to('/')) === 0) {
             return $url;
         }

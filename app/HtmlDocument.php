@@ -165,6 +165,17 @@ class HtmlDocument extends Document
                 $img->setAttribute("srcset", $srcset);
             }
         }
+
+        # All Input Elements
+        foreach ($dom->getElementsByTagName('input') as $input) {
+            if ($input->hasAttribute("src")) {
+                # Convert all Image src's to Absolute Links
+                $input->setAttribute("src", $this->convertRelativeToAbsoluteLink($input->getAttribute("src")));
+                # input all Image Sources to proxified Versions
+                $input->setAttribute("src", $this->proxifyUrl($input->getAttribute("src"), false));
+            }
+        }
+
         # All Source Tags
         foreach ($dom->getElementsByTagName('source') as $img) {
             if ($img->hasAttribute("src")) {

@@ -70,6 +70,8 @@ class ProxyController extends Controller
             return redirect($newLink);
         }
 
+        $this->writeLog($targetUrl, $request->ip());
+
         $toggles = "111000A";
 
         # Script Toggle Url:
@@ -394,5 +396,16 @@ class ProxyController extends Controller
         }
 
         return $iframeUrl;
+    }
+
+    private function writeLog($targetUrl, $ip)
+    {
+        $logFile = env('PROXY_LOG_LOCATION');
+
+        $dateString = date('D M d H:i:s Y');
+
+        $logString = $dateString . "\t" . $targetUrl . "\t" . $ip . "\n";
+
+        file_put_contents($logFile, $logString);
     }
 }

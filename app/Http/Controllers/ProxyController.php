@@ -33,11 +33,26 @@ class ProxyController extends Controller
             # Let's redirect to the correct URI
             $proxyParams   = $request->except(array_keys($params));
             $redirProxyUrl = $targetUrl;
+            $redirParams   = [];
             if (strpos($redirProxyUrl, "?") === false) {
                 $redirProxyUrl .= "?";
+            } else {
+                # There are already Params for this site which need to get updated
+                $tmpParams = substr($redirProxyUrl, strpos($redirProxyUrl, "?") + 1);
+                $tmpParams = explode("&", $tmpParams);
+                foreach ($tmpParams as $param) {
+                    $tmp = explode("=", $param);
+                    if (sizeof($tmp) === 2) {
+                        $redirParams[$tmp[0]] = $tmp[1];
+                    }
+                }
             }
 
             foreach ($params as $key => $value) {
+                $redirParams[$key] = $value;
+            }
+
+            foreach ($redirParams as $key => $value) {
                 $redirProxyUrl .= $key . "=" . urlencode($value) . "&";
             }
 

@@ -140,7 +140,7 @@ class ProxyController extends Controller
         $result   = [];
         $httpcode = 200;
 
-        if (!Cache::has($hash)) {
+        if (!Cache::has($hash) || 1 === 1) {
             // Inits the Curl connection for being able to preload multiple URLs while using a keep-alive connection
             $this->initCurl();
             $result = $this->getUrlContent($targetUrl, false);
@@ -198,7 +198,7 @@ class ProxyController extends Controller
                 # redundant file transfers:
                 $val = base64_encode(serialize($result));
 
-                Cache::put($hash, $val, 60);
+                #Cache::put($hash, $val, 60);
             }
 
             curl_close($this->ch);

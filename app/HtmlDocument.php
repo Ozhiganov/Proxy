@@ -100,6 +100,7 @@ class HtmlDocument extends Document
                 # Convert all relative Links to absolute Ones
                 $action = $this->convertRelativeToAbsoluteLink($action);
             }
+            #
             # And finally Proxify the Url
             $action = $this->proxifyUrl($action, true);
             $form->setAttribute("action", $action);

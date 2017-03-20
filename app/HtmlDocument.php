@@ -46,13 +46,22 @@ class HtmlDocument extends Document
 
         # First things first. Let's change all a Tags that can define a target Attribute
         foreach ($dom->getElementsByTagName('a') as $link) {
-            # All Links within a "a" Tag need to target the top level because they change the site on click
-            $this->convertTargetAttribute($link, "_top");
-            # Convert all relative Links to absolute Ones
-            $link->setAttribute("href", $this->convertRelativeToAbsoluteLink($link->getAttribute("href")));
-            # Convert all Links to the proxified Version
-            # All of this Links should target to the top Level
-            $link->setAttribute("href", $this->proxifyUrl($link->getAttribute("href"), true));
+            if ($link->hasAttribute("href")) {
+                if (stripos($link->getAttribute("href"), "#") === 0) {
+                    continue;
+                } elseif (stripos($link->getAttribute("href"), "javascript:") === 0) {
+                    $link->setAttribute("href", "");
+                } else {
+                    # All Links within a "a" Tag need to target the top level because they change the site on click
+                    $this->convertTargetAttribute($link, "_top");
+                    # Convert all relative Links to absolute Ones
+                    $link->setAttribute("href", $this->convertRelativeToAbsoluteLink($link->getAttribute("href")));
+                    # Convert all Links to the proxified Version
+                    # All of this Links should target to the top Level
+                    $link->setAttribute("href", $this->proxifyUrl($link->getAttribute("href"), true));
+                }
+            }
+
         }
 
         # All Buttons

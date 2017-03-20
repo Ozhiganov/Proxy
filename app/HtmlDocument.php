@@ -165,6 +165,35 @@ class HtmlDocument extends Document
                 $img->setAttribute("srcset", $srcset);
             }
         }
+        # All Source Tags
+        foreach ($dom->getElementsByTagName('source') as $img) {
+            if ($img->hasAttribute("src")) {
+                # Convert all Image src's to Absolute Links
+                $img->setAttribute("src", $this->convertRelativeToAbsoluteLink($img->getAttribute("src")));
+                # Convert all Image Sources to proxified Versions
+                $img->setAttribute("src", $this->proxifyUrl($img->getAttribute("src"), false));
+
+            }
+            # Some Images might contain a srcset (Different Images for different resolutions)
+            # Syntax would be i.e. srcset="medium.jpg 1000w, large.jpg 2000w"
+            $srcset = $img->getAttribute("srcset");
+            if ($srcset !== "") {
+                $images = explode(",", $srcset);
+                foreach ($images as $index => $set) {
+                    $set   = trim($set);
+                    $parts = preg_split("/\s+/si", $set);
+                    # $parts[0] is the Image Path
+                    # It could be relative so convert that one:
+                    $parts[0] = $this->convertRelativeToAbsoluteLink($parts[0]);
+
+                    # And now Proxify it:
+                    $parts[0]       = $this->proxifyUrl($parts[0], false);
+                    $images[$index] = implode(" ", $parts);
+                }
+                $srcset = implode(",", $images);
+                $img->setAttribute("srcset", $srcset);
+            }
+        }
 
         # Alle Meta Tags
         foreach ($dom->getElementsByTagName('meta') as $meta) {

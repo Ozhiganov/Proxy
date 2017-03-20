@@ -238,6 +238,29 @@ class HtmlDocument extends Document
             $style->nodeValue = $cssElement->getResult();
         }
 
+        foreach ($dom->getElementsByTagName("noscript") as $noscript) {
+            $this->DOMRemove($noscript);
+
+        }
+
+        # Nun alle Video Tags
+        foreach ($dom->getElementsByTagName("video") as $video) {
+            if ($video->hasAttribute("src")) {
+                # Convert all relative Links to absolute Ones
+                $video->setAttribute("src", $this->convertRelativeToAbsoluteLink($video->getAttribute("src")));
+                # Convert all Links to the proxified Version
+                # All of this Links should NOT target to the top Level
+                $video->setAttribute("src", $this->proxifyUrl($video->getAttribute("src"), false));
+            }
+            if ($video->hasAttribute("poster")) {
+                # Convert all relative Links to absolute Ones
+                $video->setAttribute("poster", $this->convertRelativeToAbsoluteLink($video->getAttribute("poster")));
+                # Convert all Links to the proxified Version
+                # All of this Links should NOT target to the top Level
+                $video->setAttribute("poster", $this->proxifyUrl($video->getAttribute("poster"), false));
+            }
+        }
+
         # Abschließend gehen wir noch einmal alle Tags durch
         foreach ($dom->getElementsByTagName('*') as $el) {
             if ($el->getAttribute("style") !== "") {
@@ -269,5 +292,15 @@ class HtmlDocument extends Document
     private function convertTargetAttribute($link, $newTarget)
     {
         $link->setAttribute("target", $newTarget);
+    }
+
+    private function DOMRemove(\DOMNode $from)
+    {
+        $sibling = $from->firstChild;
+        do {
+            $next = $sibling->nextSibling;
+            $from->parentNode->insertBefore($sibling, $from);
+        } while ($sibling = $next);
+        $from->parentNode->removeChild($from);
     }
 }

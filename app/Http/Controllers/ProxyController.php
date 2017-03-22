@@ -16,7 +16,6 @@ class ProxyController extends Controller
     {
         $targetUrl = str_replace("<<SLASH>>", "/", $url);
         $targetUrl = str_rot13(base64_decode($targetUrl));
-
         if (strpos($targetUrl, URL::to('/')) === 0) {
             return redirect($targetUrl);
         }
@@ -212,6 +211,10 @@ class ProxyController extends Controller
             if (isset($result["http_code"]) && $result["http_code"] !== 0) {
                 $httpcode = $result["http_code"];
             }
+        }
+
+        if ($result["data"] === false) {
+            $result["data"] = "";
         }
 
         return response($result["data"], $httpcode)

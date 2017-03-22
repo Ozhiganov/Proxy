@@ -410,6 +410,6 @@ class ProxyController extends Controller
 
         $logString = $dateString . "\t" . $targetUrl . "\t" . $ip . "\n";
 
-        file_put_contents($logFile, $logString);
+        file_put_contents($logFile, $logString, FILE_APPEND);
     }
 }

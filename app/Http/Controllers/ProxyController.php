@@ -153,6 +153,7 @@ class ProxyController extends Controller
                 $httpcode = $result["http_code"];
 
                 extract(parse_url($targetUrl));
+
                 $base = $scheme . "://" . $host;
 
                 # We will parse whether we have a parser for this document type.

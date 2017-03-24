@@ -106,6 +106,10 @@ abstract class Document
             $abs .= '@';
         }
 
+        if (!isset($host)) {
+            #die(var_dump($this->baseUrl));
+        }
+
         $abs .= $host;
         /* did somebody sneak in a port? */
         if (isset($port)) {

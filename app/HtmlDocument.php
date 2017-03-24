@@ -36,11 +36,13 @@ class HtmlDocument extends Document
         $dom->loadHtml($this->htmlString);
 
         foreach ($dom->getElementsByTagName('base') as $base) {
-            $href = $base->getAttribute('href');
-            # Convert all relative Links to absolute Ones
-            $href          = $this->convertRelativeToAbsoluteLink($href);
-            $this->baseUrl = $href;
-            # Delete Base Tag
+            if ($base->hasAttribute("href")) {
+                $href = $base->getAttribute('href');
+                # Convert all relative Links to absolute Ones
+                $href          = $this->convertRelativeToAbsoluteLink($href);
+                $this->baseUrl = $href;
+                # Delete Base Tag
+            }
             $base->parentNode->removeChild($base);
         }
 
@@ -290,6 +292,16 @@ class HtmlDocument extends Document
                 $cssElement->proxifyContent();
                 $el->setAttribute("style", $cssElement->getResult());
             }
+
+            # Some old sites might use the background attribute Let's parse them, too
+            if ($el->hasAttribute("background")) {
+                # Convert all relative Links to absolute Ones
+                $el->setAttribute("background", $this->convertRelativeToAbsoluteLink($el->getAttribute("background")));
+                # Convert all Links to the proxified Version
+                # All of this Links should NOT target to the top Level
+                $el->setAttribute("background", $this->proxifyUrl($el->getAttribute("background"), false));
+            }
+
             # We Will Remove all Javascript Event attributes
             # To keep things simple we're gonna remove all Attributes which names start with "on"
             foreach ($el->attributes as $attr) {

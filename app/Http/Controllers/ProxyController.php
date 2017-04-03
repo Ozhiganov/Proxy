@@ -166,6 +166,15 @@ class ProxyController extends Controller
                         $htmlDocument->proxifyContent();
                         $result["data"] = $htmlDocument->getResult();
                         break;
+                    case 'application/pdf':
+                        if (!isset($result["header"]["content-disposition"])) {
+                            $name     = "document.pdf";
+                            $basename = basename($targetUrl);
+                            if (stripos($basename, ".pdf") !== false) {
+                                $name = $basename;
+                            }
+                            $result["header"]["content-disposition"] = "attachment; filename=$name";
+                        }
                     case 'image/png':
                     case 'image/jpeg':
                     case 'image/gif':
@@ -308,6 +317,8 @@ class ProxyController extends Controller
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
                         } elseif (strtolower($ar[0]) === "location") {
                             $headerArray[trim($ar[0])] = $this->proxifyUrl(trim($ar[1]), null, false);
+                        } elseif (strtolower($ar[0]) === "content-disposition") {
+                            $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
                         } else {
                             #$headerArray[trim($ar[0])] = trim($ar[1]);
                         }

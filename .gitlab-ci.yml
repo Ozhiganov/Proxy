@@ -16,6 +16,8 @@ update(proxy.suma-ev.de):
     - cp -r * ~/.Proxy
     - cd ~/.Proxy
     - composer install
+    - npm install
+    - npm run production
     - cp ~/.env .
     - chmod -R 777 storage
     - chmod -R 777 bootstrap/cache

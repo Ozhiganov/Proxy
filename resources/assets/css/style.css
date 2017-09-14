@@ -1,0 +1,47 @@
+nav {
+	border-bottom: 5px solid rgb(255,128,0);
+	height:48px;
+	overflow: hidden;
+}
+
+nav>.main {
+	display: flex;
+	align-items: center;
+}
+
+nav>.main>.metager-logo {
+	flex-grow: 0;
+	width:90px;
+}
+
+nav>.main>.metager-logo img {
+	width: 80px;
+	margin-right:10px;
+}
+
+nav>.main>.navigation {
+	flex-grow: 1;
+}
+
+nav>.main>.navigation input {
+	font-size: 12px;
+	padding: 3px 12px;
+	height: 23px;
+}
+
+nav>.main>#proxy-text {
+	flex-grow: 0;
+	margin: 0 5px;
+}
+
+#site-proxy-iframe {
+	border: 0;
+	width: 100%;
+	height: calc(100% - 53px);
+}
+
+.content-container {
+	border-radius: 7px;
+	margin-top: 50px;
+	box-shadow: 1px 1px 3px 1px rgba(0, 0, 0, 0.3);
+}

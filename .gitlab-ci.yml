@@ -4,7 +4,7 @@ update(proxy.suma-ev.de):
   tags:
     - proxy.suma-ev.de
   only:
-    - master@dominik/Proxy
+    - master@open-source/Proxy
   before_script:
     # Abhängigkeiten überprüfen
     - which composer

@@ -1,9 +1,6 @@
-@extends('layouts.app')
+@extends('layouts.app', ['url' => $targetUrl])
 
 @section('content')
-<div class ="container-fluid">
-	<input class="form-control" type="text" value="{{$targetUrl}}" readonly/>
-</div>
 <iframe
 	id="site-proxy-iframe"
 	src="{!!$iframeUrl!!}"

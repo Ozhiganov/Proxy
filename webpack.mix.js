@@ -12,7 +12,7 @@ const { mix } = require('laravel-mix');
  */
 
 mix.combine([
-			'resources/assets/css/app.css',
-			'resources/assets/bootstrap.min.css',
+		'resources/assets/css/bootstrap.min.css',
 			'resources/assets/css/style.css'
+			
 ], 'public/css/all.css').version();

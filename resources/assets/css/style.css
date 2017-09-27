@@ -34,6 +34,10 @@ nav>.main>#proxy-text {
 	margin: 0 5px;
 }
 
+nav>.main>#proxy-text>a.btn{
+	padding: 1px 12px;
+}
+
 #site-proxy-iframe {
 	border: 0;
 	width: 100%;

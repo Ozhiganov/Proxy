@@ -11,6 +11,10 @@
 |
  */
 
+Route::post('/{url}', function($url){
+	abort(405);
+});
+
 Route::get('/', function () {
     $url      = "https://metager.de";
     $password = md5(env('PROXY_PASSWORD') . $url);

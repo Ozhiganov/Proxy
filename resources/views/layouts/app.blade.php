@@ -12,12 +12,14 @@
 				</a>
 			</div>
 			<div class="navigation">
-				<input class="form-control" type="text" value="{{$targetUrl}}" readonly="">
+				<input class="form-control" type="text" value="@if(isset($targetUrl)){{$targetUrl}}@endif" readonly="">
 			</div>
+			@if(isset($targetUrl))
 			<div id="proxy-text" class="">
 				<a href="{!!$targetUrl!!}"
 					class="btn btn-danger btn-xs">Proxy ausschalten</a>
 			</div>
+			@endif
 		</div>
 		<div style="text-align: center; font-size: 11px;">SUMA-EV ist
 			weder Eigentümer noch Urheber von Inhalten. Skripte sind

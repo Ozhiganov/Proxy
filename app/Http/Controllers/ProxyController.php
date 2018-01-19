@@ -14,6 +14,7 @@ class ProxyController extends Controller
 {
     public function proxyPage(Request $request, $password, $url)
     {
+        
         $targetUrl = str_replace("<<SLASH>>", "/", $url);
         $targetUrl = str_rot13(base64_decode($targetUrl));
         if (strpos($targetUrl, URL::to('/')) === 0) {

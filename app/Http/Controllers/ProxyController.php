@@ -191,6 +191,7 @@ class ProxyController extends Controller
                     case 'image/vnd.microsoft.icon':
                     case 'application/vnd.ms-fontobject':
                     case 'application/x-font-ttf':
+                    case 'application/x-www-form-urlencoded':
                         # Nothing to do with Images: Just return them
                         break;
                     case 'text/css':

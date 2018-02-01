@@ -97,6 +97,15 @@ class HtmlDocument extends Document
         foreach ($dom->getElementsByTagName('area') as $area) {
             # All Links within a "a" Tag need to target the top level because they change the site on click
             $this->convertTargetAttribute($area, "_top");
+            if ($area->hasAttribute("href")) {
+                $href = $area->getAttribute("href");
+                # Rel to abs
+                $href = $this->convertRelativeToAbsoluteLink($href);
+                # Abs to proxified
+                $href = $this->proxifyUrl($href, true);
+                # And replace
+                $area->setAttribute("href", $href);
+            }
         }
 
         foreach ($dom->getElementsByTagName('form') as $form) {

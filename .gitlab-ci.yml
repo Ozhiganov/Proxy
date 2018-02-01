@@ -19,6 +19,7 @@ update(proxy.suma-ev.de):
     - npm install
     - npm run production
     - cp ~/.env .
+    - touch storage/logs/laravel.log
     - chmod -R 777 storage
     - chmod -R 777 bootstrap/cache
     - if [ -f ~/Proxy/artisan ]; then php ~/Proxy/artisan down;fi

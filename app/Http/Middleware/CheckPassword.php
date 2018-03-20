@@ -27,7 +27,7 @@ class CheckPassword
             $targetUrl = str_rot13(base64_decode($targetUrl));
             
             // FIXME temporary check for ban list
-            if (md5($targetUrl) === "34ad9f915d09506dd41912507a63de1b") {
+            if (md5($targetUrl) === "34ad9f915d09506dd41912507a63de1b" || md5($targetUrl) === "9426d9acd8922d8f7f65f73f690e7fa2") {
                 return abort(403);
             }
             

@@ -25,6 +25,12 @@ class CheckPassword
         } else {
             $targetUrl = str_replace("<<SLASH>>", "/", $request->route('url'));
             $targetUrl = str_rot13(base64_decode($targetUrl));
+            
+            // FIXME temporary check for ban list
+            if (md5($targetUrl) === "d1524b8dd3f1bee9ba24fe775339ba40") {
+                return abort(403);
+            }
+            
             // Check Password:
             $checkPw  = md5(env('PROXY_PASSWORD') . $targetUrl);
             $password = $request->route('password');

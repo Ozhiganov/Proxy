@@ -131,7 +131,7 @@ class ProxyController extends Controller
         $supportedContentTypes = [
             'text/html',
         ];
-
+        
         $targetUrl      = str_replace("<<SLASH>>", "/", $url);
         $targetUrl      = str_rot13(base64_decode($targetUrl));
         $this->password = $password;
@@ -159,11 +159,14 @@ class ProxyController extends Controller
 
                 # We will parse whether we have a parser for this document type.
                 # If not, we will not Proxy it:
+                $contentTypeHeader = $result["header"]["content-type"];
                 $contentType = strpos($result["header"]["content-type"], ";") !== false ? trim(substr($result["header"]["content-type"], 0, strpos($result["header"]["content-type"], ";"))) : trim($result["header"]["content-type"]);
+                $contentEncoding = stripos($contentTypeHeader, "charset=") !== false ? trim(substr($contentTypeHeader, stripos($contentTypeHeader, "charset=")+8)) : null; 
                 switch ($contentType) {
                     case 'text/html':
                         # It's a html Document
-                        $htmlDocument = new HtmlDocument($password, $targetUrl, $result["data"]);
+                        $contentEncoding = null;
+                        $htmlDocument = new HtmlDocument($password, $targetUrl, $result["data"], $contentEncoding);
                         $htmlDocument->proxifyContent();
                         $result["data"] = $htmlDocument->getResult();
                         break;

@@ -21,6 +21,22 @@ class CssDocument extends Document
         $this->styleString = preg_replace_callback("/(url\()([\"\']{1})([^\\2]+?)\\2/si", "self::pregReplaceUrl", $this->styleString);
         # And then the ones without Quotation Marks
         $this->styleString = preg_replace_callback("/(url\()([^\"\'][^\)]+?)(\))/si", "self::pregReplaceUrlNoQuotes", $this->styleString);
+
+        # Replace @imports without url()
+        $this->styleString = preg_replace_callback("/(@import\s+)([\"\'])(.*?)(\\2)/si", "self::pregReplaceImport", $this->styleString);
+    }
+
+    private function pregReplaceImport($matches)
+    {
+        $url = $matches[3];
+        # Relative to Absolute
+        $url = $this->convertRelativeToAbsoluteLink($url);
+        # Proxify Url
+        $url = $this->proxifyUrl($url, false);
+
+        $replacement = $matches[1] . $matches[2] . $url . $matches[4];
+
+        return $replacement;
     }
 
     private function pregReplaceUrl($matches)

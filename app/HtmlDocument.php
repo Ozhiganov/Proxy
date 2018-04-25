@@ -9,10 +9,37 @@ class HtmlDocument extends Document
 
     private $htmlString;
 
-    public function __construct($password, $baseUrl, $htmlString, $encoding = "UTF-8")
+    public function __construct($password, $baseUrl, $htmlString, $encoding)
     {
         parent::__construct($password, $baseUrl);
-        $this->htmlString = mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
+        $this->htmlString = $this->convertEncoding($htmlString, $encoding);
+    }
+
+    public function convertEncoding($htmlString, $encoding){
+        # If the site sets the document encoding in the "content-type" Header the $encoding variable is not null
+        if($encoding == null){
+            # Otherwise we will try to extract the correct encoding from the meta tag
+            # Let's create a new DOM
+            libxml_use_internal_errors(true);
+            $dom = new DomDocument();
+            $dom->loadHtml($htmlString);
+            
+            foreach($dom->getElementsByTagName("meta") as $meta){                
+                # If there is a Content-Type Meta Tag
+                if($meta->hasAttribute("http-equiv") && strtolower($meta->getAttribute("http-equiv")) === "content-type" && $meta->hasAttribute("content")){
+                    $contentType = $meta->getAttribute("content");
+                    $encoding = stripos($contentType, "charset=") !== false ? trim(substr($contentType, stripos($contentType, "charset=")+8)) : null;
+                    if($encoding !== null) break;
+                }
+                # If there is a Charset Meta Tag
+                if($meta->hasAttribute("charset")){
+                    $encoding = $meta->getAttribute("charset");
+                    break;
+                }
+            }
+            if($encoding === null) $encoding = "UTF-8"; # Default Fallback
+        }
+        return mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
     }
 
     public function getResult()

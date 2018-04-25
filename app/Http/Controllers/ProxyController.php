@@ -165,7 +165,6 @@ class ProxyController extends Controller
                 switch ($contentType) {
                     case 'text/html':
                         # It's a html Document
-                        $contentEncoding = null;
                         $htmlDocument = new HtmlDocument($password, $targetUrl, $result["data"], $contentEncoding);
                         $htmlDocument->proxifyContent();
                         $result["data"] = $htmlDocument->getResult();

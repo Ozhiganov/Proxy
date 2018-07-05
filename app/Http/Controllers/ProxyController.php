@@ -162,6 +162,7 @@ class ProxyController extends Controller
                 $contentTypeHeader = $result["header"]["content-type"];
                 $contentType = strpos($result["header"]["content-type"], ";") !== false ? trim(substr($result["header"]["content-type"], 0, strpos($result["header"]["content-type"], ";"))) : trim($result["header"]["content-type"]);
                 $contentEncoding = stripos($contentTypeHeader, "charset=") !== false ? trim(substr($contentTypeHeader, stripos($contentTypeHeader, "charset=")+8)) : null; 
+                $contentEncoding = rtrim($contentEncoding, ";");
                 switch ($contentType) {
                     case 'text/html':
                         # It's a html Document

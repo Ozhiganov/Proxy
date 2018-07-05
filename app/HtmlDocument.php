@@ -29,6 +29,7 @@ class HtmlDocument extends Document
                 if($meta->hasAttribute("http-equiv") && strtolower($meta->getAttribute("http-equiv")) === "content-type" && $meta->hasAttribute("content")){
                     $contentType = $meta->getAttribute("content");
                     $encoding = stripos($contentType, "charset=") !== false ? trim(substr($contentType, stripos($contentType, "charset=")+8)) : null;
+                    $contentEncoding = rtrim($contentEncoding, ";");
                     if($encoding !== null) break;
                 }
                 # If there is a Charset Meta Tag
@@ -39,6 +40,7 @@ class HtmlDocument extends Document
             }
             if($encoding === null) $encoding = "UTF-8"; # Default Fallback
         }
+        
         return mb_convert_encoding($htmlString, 'HTML-ENTITIES', $encoding);
     }
 

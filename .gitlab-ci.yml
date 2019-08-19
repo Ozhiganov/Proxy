@@ -11,9 +11,6 @@ variables:
   PERFORMANCE_DISABLED: "true"
   SAST_DISABLED: "true"
   TEST_DISABLED: "true"
-  
-services:
-- redis
 
 build:
   stage: build
@@ -50,7 +47,7 @@ build:
         cp /build/Dockerfile Dockerfile
       fi
     # Build the dependencies
-    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:8 bash -c "npm install && npm run prod"
+    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:8 bash -c "npm install --production && mv ./node_modules ./node_modules.tmp && mv ./node_modules.tmp ./node_modules && npm install && npm run prod"
     - docker run --dns=1.1.1.1 --rm -v $(pwd):/app composer/composer:latest install
     - docker pull $CI_APPLICATION_REPOSITORY:latest || true
     - |

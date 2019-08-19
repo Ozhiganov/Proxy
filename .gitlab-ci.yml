@@ -11,12 +11,13 @@ variables:
   PERFORMANCE_DISABLED: "true"
   SAST_DISABLED: "true"
   TEST_DISABLED: "true"
-
+  
 services:
 - redis
 
 review:
   variables:
+    AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS: --cache-from $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG
     HELM_UPGRADE_EXTRA_ARGS: --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
 
 production:

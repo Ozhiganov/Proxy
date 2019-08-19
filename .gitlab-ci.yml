@@ -50,7 +50,7 @@ build:
         cp /build/Dockerfile Dockerfile
       fi
     # Build the dependencies
-    - docker run --rm --name metager-proxy-npm-install --tag $CI_APPLICATION_REPOSITORY:node --cache-from $CI_APPLICATION_REPOSITORY:node -v "$PWD":/usr/src/app -w /usr/src/app node:8 bash -c "npm install && chmod -R go+w node_modules && npm run watch"
+    - docker run --rm --name metager-proxy-npm-install -v "$PWD":/usr/src/app -w /usr/src/app node:8 bash -c "npm install && chmod -R go+w node_modules && npm run watch"
     - docker run --rm -v $(pwd):/app composer/composer:latest install
     - docker pull $CI_APPLICATION_REPOSITORY:latest || true
     - |

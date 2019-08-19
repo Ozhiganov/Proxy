@@ -1,6 +1,17 @@
 include:
   - template: Auto-DevOps.gitlab-ci.yml
 
+variables:
+  POSTGRES_ENABLED: false
+  CODE_QUALITY_DISABLED: true
+  CONTAINER_SCANNING_DISABLED: true
+  DAST_DISABLED: true
+  DEPENDENCY_SCANNING_DISABLED: true
+  LICENSE_MANAGEMENT_DISABLED: true
+  PERFORMANCE_DISABLED: true
+  SAST_DISABLED: true
+  TEST_DISABLED: true
+
 services:
 - redis
 

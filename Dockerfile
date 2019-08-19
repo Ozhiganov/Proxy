@@ -1,4 +1,4 @@
-From nginx
+FROM nginx
 
 RUN apt -y update
 RUN apt -y install php-fpm

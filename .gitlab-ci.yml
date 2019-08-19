@@ -49,6 +49,9 @@ build:
         echo "Building Heroku-based application using gliderlabs/herokuish docker image..."
         cp /build/Dockerfile Dockerfile
       fi
+    # Build the dependencies
+    - docker run -it --rm --name metager-proxy-npm-install -v "$PWD":/usr/src/app -w /usr/src/app node:8 npm install && npm run prod
+    - docker run --rm -v $(pwd):/app composer/composer:latest install
     - docker pull $CI_APPLICATION_REPOSITORY:latest || true
     - |
       docker build \

@@ -9,6 +9,7 @@ RUN apt -y install php7.3-dom
 RUN apt -y install php7.3-zip
 RUN apt -y install php7.3-curl
 
+COPY / /html
 COPY /service-configs/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 RUN sed -i 's/listen.owner = www-data/listen.owner = nginx/g' /etc/php/7.3/fpm/pool.d/www.conf

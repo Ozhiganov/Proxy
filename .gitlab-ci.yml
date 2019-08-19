@@ -52,7 +52,7 @@ build:
     - docker pull $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG || true
     - |
       docker build \
-        --cache-from $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG
+        --cache-from $CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG \
         --build-arg BUILDPACK_URL="$BUILDPACK_URL" \
         --build-arg HTTP_PROXY="$HTTP_PROXY" \
         --build-arg http_proxy="$http_proxy" \

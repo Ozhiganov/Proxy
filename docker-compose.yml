@@ -1,0 +1,27 @@
+version: '3.7'
+services:
+  phpdeps:
+    image: composer/composer:latest
+    volumes:
+      - .:/app
+    command: install
+  assets:
+    image: node:8
+    volumes:
+      - .:/usr/src/app
+    working_dir: /usr/src/app
+    command: bash -c "npm install && chmod -R go+w node_modules && npm run watch"
+  web:
+    depends_on:
+      - "phpdeps"
+      - "assets"
+      - "redis"
+    build: .
+    working_dir: /html
+    volumes:
+      - .:/html
+    ports: 
+    - "8080:80"
+  redis:
+    image: redis
+    container_name: redis

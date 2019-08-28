@@ -3,7 +3,7 @@ stages:
 
 prepare_node:
   stage: prepare
-  image: node:slim
+  image: node:10
   script: 
     - npm install
   only:

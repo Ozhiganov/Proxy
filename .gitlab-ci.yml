@@ -4,12 +4,21 @@ stages:
 prepare_node:
   stage: prepare
   image: node:10
-  script: 
+  before_script:
     - npm install
+  script: 
+    - npm run prod
   artifacts:
     paths:
       - node_modules
-      - /root/.npm
+      - public/css/all.css
+      - /root/.node-gyp
+  cache:
+    # Cache per Branch
+    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    paths:
+      - node_modules
+      - /root/.node-gyp
   only:
     - branches
     - tags

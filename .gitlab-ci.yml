@@ -12,13 +12,24 @@ prepare_node:
     paths:
       - node_modules
       - public/css/all.css
-      - /root/.node-gyp
   cache:
     # Cache per Branch
     key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
     paths:
       - node_modules
-      - /root/.node-gyp
   only:
     - branches
     - tags
+    
+prepare_composer:
+  stage: prepare
+  image: composer/composer:latest
+  script:
+    - install
+  artifacts:
+    paths:
+      - vendor
+  cache:
+    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    paths:
+      - vendor

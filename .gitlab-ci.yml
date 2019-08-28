@@ -1,5 +1,6 @@
 stages:
   - prepare
+  - build
 
 prepare_node:
   stage: prepare
@@ -14,7 +15,7 @@ prepare_node:
       - public/css/all.css
   cache:
     # Cache per Branch
-    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    key: "node-$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
     paths:
       - node_modules
   only:
@@ -30,6 +31,9 @@ prepare_composer:
     paths:
       - vendor
   cache:
-    key: "$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
+    key: "composer-$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
     paths:
       - vendor
+
+include:
+  - template: Jobs/Build.gitlab-ci.yml

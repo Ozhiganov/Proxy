@@ -47,7 +47,7 @@ build:
         cp /build/Dockerfile Dockerfile
       fi
     # Build the dependencies
-    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:10 bash -c "apt update && apt install automake autoconf libtool dpkg nasm libpng16-16 && npm install --verbose && npm run prod"
+    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:10 bash -c "apt -y update && apt -y install automake autoconf libtool dpkg nasm libpng16-16 && npm install --verbose && npm run prod"
     - docker run --dns=1.1.1.1 --rm -v $(pwd):/app composer/composer:latest install
     - docker pull $CI_APPLICATION_REPOSITORY:latest || true
     - |

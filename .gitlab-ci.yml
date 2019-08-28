@@ -47,7 +47,7 @@ build:
         cp /build/Dockerfile Dockerfile
       fi
     # Build the dependencies
-    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:8 bash -c "npm install -dd"
+    - docker run --dns=1.1.1.1 --rm -v "$PWD":/usr/src/app -w /usr/src/app node:10 bash -c "npm install -dd && npm run prod"
     - docker run --dns=1.1.1.1 --rm -v $(pwd):/app composer/composer:latest install
     - docker pull $CI_APPLICATION_REPOSITORY:latest || true
     - |

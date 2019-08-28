@@ -6,6 +6,10 @@ prepare_node:
   image: node:10
   script: 
     - npm install
+  artifacts:
+    paths:
+      - node_modules
+      - /root/.npm
   only:
     - branches
     - tags

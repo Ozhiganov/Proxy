@@ -25,7 +25,7 @@ prepare_composer:
   stage: prepare
   image: composer/composer:latest
   script:
-    - install
+    - composer install
   artifacts:
     paths:
       - vendor

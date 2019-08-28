@@ -15,7 +15,7 @@ variables:
 stages:
   - prepare
 
-prepare:node:
+prepare_node:
   stage: prepare
   image: node:slim
   script: 

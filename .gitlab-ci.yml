@@ -72,21 +72,7 @@ build:
     # shellcheck disable=SC2154 # missing variable warning for the lowercase variables
     # shellcheck disable=SC2086 # double quoting for globbing warning for $AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS
     - docker pull $CI_APPLICATION_REPOSITORY:latest
-    - >
-      docker build
-        --cache-from $CI_REGISTRY_IMAGE:latest
-        --build-arg BUILDPACK_URL="$BUILDPACK_URL"
-        --build-arg HTTP_PROXY="$HTTP_PROXY"
-        --build-arg http_proxy="$http_proxy"
-        --build-arg HTTPS_PROXY="$HTTPS_PROXY"
-        --build-arg https_proxy="$https_proxy"
-        --build-arg FTP_PROXY="$FTP_PROXY"
-        --build-arg ftp_proxy="$ftp_proxy"
-        --build-arg NO_PROXY="$NO_PROXY"
-        --build-arg no_proxy="$no_proxy"
-        $AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS
-        --tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
-        --tag "$CI_APPLICATION_REPOSITORY:latest" .
+    - docker build --cache-from $CI_REGISTRY_IMAGE:latest --build-arg BUILDPACK_URL="$BUILDPACK_URL" --build-arg HTTP_PROXY="$HTTP_PROXY" --build-arg http_proxy="$http_proxy" --build-arg HTTPS_PROXY="$HTTPS_PROXY" --build-arg https_proxy="$https_proxy" --build-arg FTP_PROXY="$FTP_PROXY" --build-arg ftp_proxy="$ftp_proxy" --build-arg NO_PROXY="$NO_PROXY" --build-arg no_proxy="$no_proxy" $AUTO_DEVOPS_BUILD_IMAGE_EXTRA_ARGS --tag "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG" --tag "$CI_APPLICATION_REPOSITORY:latest" .
     - docker push "$CI_APPLICATION_REPOSITORY:latest"
     - docker push "$CI_APPLICATION_REPOSITORY:$CI_APPLICATION_TAG"
   only:

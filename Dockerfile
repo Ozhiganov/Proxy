@@ -12,5 +12,6 @@ RUN sed -i 's/group = www-data/group = nginx/g' /etc/php/7.3/fpm/pool.d/www.conf
 RUN sed -i 's/;cgi.fix_pathinfo=1/cgi.fix_pathinfo=0/g' /etc/php/7.3/fpm/php.ini
 
 WORKDIR /html
+EXPOSE 80
 
 CMD /html/service-configs/start.sh

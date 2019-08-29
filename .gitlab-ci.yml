@@ -1,5 +1,14 @@
 variables:
     DOCKER_HOST: tcp://docker-dind.gitlab:2375
+    POSTGRES_ENABLED: false
+    CODE_QUALITY_DISABLED: true
+    CONTAINER_SCANNING_DISABLED: true
+    DAST_DISABLED: true
+    DEPENDENCY_SCANNING_DISABLED: true
+    LICENSE_MANAGEMENT_DISABLED: true
+    PERFORMANCE_DISABLED: true
+    SAST_DISABLED: true
+    TEST_DISABLED: true
 
 include:
   - template: Jobs/Build.gitlab-ci.yml
@@ -8,8 +17,20 @@ include:
 stages:
   - prepare
   - build
+  - test
+  - deploy  # dummy stage to follow the template guidelines
   - review
+  - dast
+  - staging
+  - canary
+  - production
+  - incremental rollout 10%
+  - incremental rollout 25%
+  - incremental rollout 50%
+  - incremental rollout 100%
+  - performance
   - cleanup
+
 
 prepare_node:
   stage: prepare

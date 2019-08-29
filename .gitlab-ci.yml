@@ -38,5 +38,8 @@ prepare_composer:
     paths:
       - vendor
 
+include:
+    - template: Jobs/Build.gitlab-ci.yml
+    
 build:
   services:

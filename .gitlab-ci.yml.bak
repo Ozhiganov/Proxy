@@ -1,0 +1,29 @@
+# This file is a template, and might need editing before it works on your project.
+# Full project: https://gitlab.com/pages/plain-html
+update(proxy.suma-ev.de):
+  tags:
+    - proxy.suma-ev.de
+  only:
+    - master@open-source/Proxy
+  before_script:
+    # Abhängigkeiten überprüfen
+    - which composer
+    - which git
+    - which php
+  script:
+    - if [ -d ~/.Proxy ]; then rm -rf ~/.Proxy;fi
+    - mkdir ~/.Proxy
+    - cp -r * ~/.Proxy
+    - cd ~/.Proxy
+    - composer install
+    - npm install
+    - npm run production
+    - cp ~/.env .
+    - touch storage/logs/laravel.log
+    - chmod -R 777 storage
+    - chmod -R 777 bootstrap/cache
+    - if [ -f ~/Proxy/artisan ]; then php ~/Proxy/artisan down;fi
+    - cd ~/
+    - while [ -d ~/Proxy ]; do rm -rf ~/Proxy;done
+    - mv .Proxy Proxy
+    - if [ -f ~/Proxy/artisan ]; then php ~/Proxy/artisan up;fi

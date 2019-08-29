@@ -53,9 +53,7 @@ build:
       fi
     - |
       if ! docker info &>/dev/null; then
-        if [ -z "$DOCKER_HOST" ] && [ "$KUBERNETES_PORT" ]; then
-          export DOCKER_HOST='tcp://localhost:2375'
-        fi
+        export DOCKER_HOST='tcp://docker-dind.gitlab:2375'
       fi
     - |
       if [[ -n "$CI_REGISTRY" && -n "$CI_REGISTRY_USER" ]]; then

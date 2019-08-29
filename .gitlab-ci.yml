@@ -41,7 +41,7 @@ prepare_composer:
       - vendor
 
 include:
-    - template: Jobs/Build.gitlab-ci.yml
+  - template: Jobs/Build.gitlab-ci.yml
     
 build:
   services:

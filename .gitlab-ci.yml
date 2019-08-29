@@ -71,4 +71,6 @@ build:
 review:
   variables:
     HELM_UPGRADE_EXTRA_ARGS: --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
+    ROLLOUT_RESOURCE_TYPE: deployment
+
 

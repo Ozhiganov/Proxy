@@ -36,6 +36,9 @@ prepare_secrets:
   image: alpine:latest
   script:
     -echo "$ENV_FILE" > .env # Also provide env file
+  artifacts:
+    paths:
+      .env
 
 prepare_node:
   stage: prepare
@@ -48,7 +51,6 @@ prepare_node:
     paths:
       - node_modules
       - public/css/all.css
-      - .env
   cache:
     # Cache per Branch
     key: "node-$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"

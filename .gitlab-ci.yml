@@ -35,7 +35,7 @@ prepare_secrets:
   stage: prepare
   image: alpine:latest
   script:
-    - echo "$ENV_FILE" > .env # Also provide env file
+    - cp $ENV_FILE .env # Also provide env file
   artifacts:
     paths:
       - .env

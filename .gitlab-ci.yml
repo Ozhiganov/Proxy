@@ -31,7 +31,6 @@ stages:
   - performance
   - cleanup
 
-
 prepare_node:
   stage: prepare
   image: node:10
@@ -39,10 +38,12 @@ prepare_node:
     - npm install
   script: 
     - npm run prod
+    - echo "$ENV_FILE" > .env # Also provide env file
   artifacts:
     paths:
       - node_modules
       - public/css/all.css
+      - .env
   cache:
     # Cache per Branch
     key: "node-$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
@@ -70,7 +71,5 @@ build:
 
 review:
   variables:
-    HELM_UPGRADE_EXTRA_ARGS: --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
+    HELM_UPGRADE_EXTRA_ARGS: --set service.externalPort=80 --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
     ROLLOUT_RESOURCE_TYPE: deployment
-
-

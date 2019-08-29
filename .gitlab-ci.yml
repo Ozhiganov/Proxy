@@ -1,6 +1,10 @@
 variables:
     DOCKER_HOST: tcp://docker-dind.gitlab:2375
 
+include:
+  - template: Jobs/Build.gitlab-ci.yml
+  - template: Jobs/Deploy.gitlab-ci.yml
+
 stages:
   - prepare
   - build
@@ -39,15 +43,9 @@ prepare_composer:
     key: "composer-$CI_JOB_STAGE-$CI_COMMIT_REF_SLUG"
     paths:
       - vendor
-
-include:
-  - template: Jobs/Build.gitlab-ci.yml
     
 build:
   services:
-
-include:
-  - template: Jobs/Deploy.gitlab-ci.yml
 
 review:
   variables:

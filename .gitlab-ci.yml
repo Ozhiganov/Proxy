@@ -4,6 +4,8 @@ variables:
 stages:
   - prepare
   - build
+  - review
+  - cleanup
 
 prepare_node:
   stage: prepare
@@ -43,3 +45,11 @@ include:
     
 build:
   services:
+
+include:
+  - template: Jobs/Deploy.gitlab-ci.yml
+
+review:
+  variables:
+    HELM_UPGRADE_EXTRA_ARGS: --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
+

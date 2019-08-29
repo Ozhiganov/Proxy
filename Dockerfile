@@ -2,7 +2,7 @@ FROM nginx
 
 RUN apt -y update && apt -y install php-fpm ca-certificates zip php7.3-mbstring php7.3-dom php7.3-zip php7.3-curl
 
-COPY / /html
+COPY . /html
 COPY /service-configs/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 RUN sed -i 's/listen.owner = www-data/listen.owner = nginx/g' /etc/php/7.3/fpm/pool.d/www.conf

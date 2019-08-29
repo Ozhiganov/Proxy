@@ -1,14 +1,14 @@
 variables:
-    DOCKER_HOST: tcp://docker-dind.gitlab:2375
-    POSTGRES_ENABLED: false
-    CODE_QUALITY_DISABLED: true
-    CONTAINER_SCANNING_DISABLED: true
-    DAST_DISABLED: true
-    DEPENDENCY_SCANNING_DISABLED: true
-    LICENSE_MANAGEMENT_DISABLED: true
-    PERFORMANCE_DISABLED: true
-    SAST_DISABLED: true
-    TEST_DISABLED: true
+    - DOCKER_HOST: tcp://docker-dind.gitlab:2375
+    - POSTGRES_ENABLED: false
+    - CODE_QUALITY_DISABLED: true
+    - CONTAINER_SCANNING_DISABLED: true
+    - DAST_DISABLED: true
+    - DEPENDENCY_SCANNING_DISABLED: true
+    - LICENSE_MANAGEMENT_DISABLED: true
+    - PERFORMANCE_DISABLED: true
+    - SAST_DISABLED: true
+    - TEST_DISABLED: true
 
 include:
   - template: Jobs/Build.gitlab-ci.yml

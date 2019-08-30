@@ -1,16 +1,16 @@
 version: '3.7'
 services:
   phpdeps:
-    image: composer/composer:latest
+    image: prooph/composer:7.3
     volumes:
       - .:/app
     command: install
   assets:
-    image: node:8
+    image: node:10
     volumes:
       - .:/usr/src/app
     working_dir: /usr/src/app
-    command: bash -c "npm install && chmod -R go+w node_modules && npm run watch"
+    command: bash -c "npm install && npm run watch"
   web:
     depends_on:
       - "phpdeps"

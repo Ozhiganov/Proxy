@@ -36,6 +36,7 @@ prepare_secrets:
   image: alpine:latest
   script:
     - cp $ENV_FILE .env # Also provide env file
+    - sed -i 's/REDIS_HOST=/REDIS_HOST=$CI_COMMIT_SHA/g' .env
   artifacts:
     paths:
       - .env
@@ -84,7 +85,7 @@ review:
   services: 
     - redis:latest
   variables:
-    HELM_UPGRADE_EXTRA_ARGS: --set service.externalPort=80 --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
+    HELM_UPGRADE_EXTRA_ARGS: --set commitSha=$CI_COMMIT_SHA --set service.externalPort=80 --set service.internalPort=80 --set service.commonName= --set ingress.tls.enabled=false --set ingress.annotations.kubernetes\.io/tls-acme="false" --set ingress.annotations.nginx\.ingress\.kubernetes\.io/ssl-redirect="false"
     ROLLOUT_RESOURCE_TYPE: deployment
     
 production:

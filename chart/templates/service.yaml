@@ -28,7 +28,7 @@ kind: Service
 metadata:
   name: {{ template "fullname" . }}-redis
   labels:
-    app: {{ template "appname" . }}-redis
+    app: {{ .Values.commitSha }}-redis
     chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}

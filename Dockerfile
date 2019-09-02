@@ -1,4 +1,4 @@
-FROM open-source/proxy/php-fpm:latest
+FROM registry.metager.de/open-source/proxy/php-fpm:latest
 
 COPY . /html
 

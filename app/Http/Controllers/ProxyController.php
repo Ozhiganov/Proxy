@@ -330,10 +330,15 @@ class ProxyController extends Controller
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
                         } elseif (strtolower($ar[0]) === "location") {
                             $redLink = $ar[1];
+
                             if (strpos($redLink, "/") === 0) {
                                 $parse = parse_url($url);
                                 $redLink = $parse["scheme"] . "://" . $parse["host"] . $redLink;
+                            } else if (preg_match("/\w+\.\w+/si", $redLink)) {
+                                $parse = parse_url($url);
+                                $redLink = $parse["scheme"] . "://" . $parse["host"] . "/" . $redLink;
                             }
+
                             $headerArray[trim($ar[0])] = $this->proxifyUrl($redLink, null, false);
                         } elseif (strtolower($ar[0]) === "content-disposition") {
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));

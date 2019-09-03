@@ -14,7 +14,6 @@ class ProxyController extends Controller
 {
     public function proxyPage(Request $request, $password, $url)
     {
-        
         $targetUrl = str_replace("<<SLASH>>", "/", $url);
         $targetUrl = str_rot13(base64_decode($targetUrl));
         if (strpos($targetUrl, URL::to('/')) === 0) {
@@ -31,9 +30,9 @@ class ProxyController extends Controller
             # There are Params that need to be passed to the page
             # Most of the times this happens due to forms that are submitted on a proxied page
             # Let's redirect to the correct URI
-            $proxyParams   = $request->except(array_keys($params));
+            $proxyParams = $request->except(array_keys($params));
             $redirProxyUrl = $targetUrl;
-            $redirParams   = [];
+            $redirParams = [];
             if (strpos($redirProxyUrl, "?") === false) {
                 $redirProxyUrl .= "?";
             } else {
@@ -63,7 +62,7 @@ class ProxyController extends Controller
             $redirProxyUrl = base64_encode(str_rot13($redirProxyUrl));
             $redirProxyUrl = urlencode(str_replace("/", "<<SLASH>>", $redirProxyUrl));
 
-            $proxyParams['url']      = $redirProxyUrl;
+            $proxyParams['url'] = $redirProxyUrl;
             $proxyParams['password'] = $pw;
 
             $newLink = action('ProxyController@proxyPage', $proxyParams);
@@ -75,35 +74,35 @@ class ProxyController extends Controller
         $toggles = "111000A";
 
         # Script Toggle Url:
-        $params         = $request->all();
+        $params = $request->all();
         $scriptsEnabled = false;
         if ($request->has('enableJS')) {
             $scriptsEnabled = true;
             array_forget($params, 'enableJS');
         } else {
-            $toggles[1]         = "0";
+            $toggles[1] = "0";
             $params['enableJS'] = "true";
         }
 
         $params['password'] = $password;
-        $params['url']      = $url;
-        $scriptUrl          = action('ProxyController@proxyPage', $params);
+        $params['url'] = $url;
+        $scriptUrl = action('ProxyController@proxyPage', $params);
         //$scriptUrl          = "javascript:alert('Diese Funktion wurde auf Grund von technischen Problemen vorerst deaktiviert. Sie können JavaScript wieder aktivieren sobald diese behoben wurden.');";
 
         # Cookie Toggle Url:
-        $params         = $request->all();
+        $params = $request->all();
         $cookiesEnabled = false;
         if ($request->has('enableCookies')) {
             $cookiesEnabled = true;
             array_forget($params, 'enableCookies');
         } else {
-            $toggles[0]              = "0";
+            $toggles[0] = "0";
             $params['enableCookies'] = "true";
         }
 
         $params['password'] = $password;
-        $params['url']      = $url;
-        $cookieUrl          = action('ProxyController@proxyPage', $params);
+        $params['url'] = $url;
+        $cookieUrl = action('ProxyController@proxyPage', $params);
 
         $settings = "u0";
         if ($cookiesEnabled && !$scriptsEnabled) {
@@ -127,20 +126,19 @@ class ProxyController extends Controller
 
     public function proxy(Request $request, $password, $url)
     {
-
         $supportedContentTypes = [
             'text/html',
         ];
-        
-        $targetUrl      = str_replace("<<SLASH>>", "/", $url);
-        $targetUrl      = str_rot13(base64_decode($targetUrl));
+
+        $targetUrl = str_replace("<<SLASH>>", "/", $url);
+        $targetUrl = str_rot13(base64_decode($targetUrl));
         $this->password = $password;
         // Hash Value under which a possible cached file would've been stored
-        $hash     = md5($targetUrl);
-        $result   = [];
+        $hash = md5($targetUrl);
+        $result = [];
         $httpcode = 200;
 
-        if (!Cache::has($hash) || 1 === 1) {
+        if (!Cache::has($hash)) {
             // Inits the Curl connection for being able to preload multiple URLs while using a keep-alive connection
             $this->initCurl();
             $result = $this->getUrlContent($targetUrl, false);
@@ -161,8 +159,9 @@ class ProxyController extends Controller
                 # If not, we will not Proxy it:
                 $contentTypeHeader = $result["header"]["content-type"];
                 $contentType = strpos($result["header"]["content-type"], ";") !== false ? trim(substr($result["header"]["content-type"], 0, strpos($result["header"]["content-type"], ";"))) : trim($result["header"]["content-type"]);
-                $contentEncoding = stripos($contentTypeHeader, "charset=") !== false ? trim(substr($contentTypeHeader, stripos($contentTypeHeader, "charset=")+8)) : null; 
+                $contentEncoding = stripos($contentTypeHeader, "charset=") !== false ? trim(substr($contentTypeHeader, stripos($contentTypeHeader, "charset=") + 8)) : null;
                 $contentEncoding = rtrim($contentEncoding, ";");
+
                 switch ($contentType) {
                     case 'text/html':
                         # It's a html Document
@@ -172,7 +171,7 @@ class ProxyController extends Controller
                         break;
                     case 'application/pdf':
                         if (!isset($result["header"]["content-disposition"])) {
-                            $name     = "document.pdf";
+                            $name = "document.pdf";
                             $basename = basename($targetUrl);
                             if (stripos($basename, ".pdf") !== false) {
                                 $name = $basename;
@@ -195,6 +194,7 @@ class ProxyController extends Controller
                     case 'application/vnd.ms-fontobject':
                     case 'application/x-font-ttf':
                     case 'application/x-www-form-urlencoded':
+                    case 'binary/octet-stream':
                         # Nothing to do with Images: Just return them
                         break;
                     case 'text/css':
@@ -212,7 +212,7 @@ class ProxyController extends Controller
                 # redundant file transfers:
                 $val = base64_encode(serialize($result));
 
-                #Cache::put($hash, $val, 60);
+                Cache::put($hash, $val, 60);
             }
 
             curl_close($this->ch);
@@ -240,15 +240,15 @@ class ProxyController extends Controller
     private function initCurl()
     {
         $this->ch = curl_init();
-        $useragent=$_SERVER['HTTP_USER_AGENT'];
-        if(preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4))){
+        $useragent = $_SERVER['HTTP_USER_AGENT'];
+        if (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i', $useragent) || preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr($useragent, 0, 4))) {
             // Mobile Browser Dummy Mobile Useragent
             curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Linux; Android 5.0; SM-G900P Build/LRX21T) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.113 Mobile Safari/537.36');
-        }else{
+        } else {
             // Not Mobile Dummy Desktop useragent
             curl_setopt($this->ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; rv:45.0) Gecko/20100101 Firefox/45.0');
         }
-            
+
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYHOST, 0);
         curl_setopt($this->ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($this->ch, CURLOPT_RETURNTRANSFER, 1);
@@ -316,9 +316,9 @@ class ProxyController extends Controller
             $httpcode = intval(curl_getinfo($this->ch, CURLINFO_HTTP_CODE));
 
             $header_size = curl_getinfo($this->ch, CURLINFO_HEADER_SIZE);
-            $header      = substr($data, 0, $header_size);
+            $header = substr($data, 0, $header_size);
 
-            $data        = substr($data, $header_size);
+            $data = substr($data, $header_size);
             $headerArray = [];
             foreach (explode(PHP_EOL, $header) as $index => $value) {
                 if ($index > 0) {
@@ -330,7 +330,7 @@ class ProxyController extends Controller
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
                         } elseif (strtolower($ar[0]) === "location") {
                             $redLink = $ar[1];
-                            if(strpos($redLink, "/") === 0){
+                            if (strpos($redLink, "/") === 0) {
                                 $parse = parse_url($url);
                                 $redLink = $parse["scheme"] . "://" . $parse["host"] . $redLink;
                             }
@@ -347,7 +347,7 @@ class ProxyController extends Controller
             # It might happen that a server doesn't give Information about file Type.
             # Let's try to generate one in this case
             if (!isset($headerArray["content-type"])) {
-                $finfo                       = new finfo(FILEINFO_MIME);
+                $finfo = new finfo(FILEINFO_MIME);
                 $headerArray["content-type"] = $finfo->buffer($data);
             }
 
@@ -411,19 +411,19 @@ class ProxyController extends Controller
             $params = \Request::all();
 
             # Password
-            $pw         = md5(env('PROXY_PASSWORD') . $url);
+            $pw = md5(env('PROXY_PASSWORD') . $url);
             $urlToProxy = base64_encode(str_rot13($url));
             $urlToProxy = urlencode(str_replace("/", "<<SLASH>>", $urlToProxy));
 
             # Params
             $params['password'] = $pw;
-            $params['url']      = $urlToProxy;
+            $params['url'] = $urlToProxy;
 
             $iframeUrl = action('ProxyController@proxyPage', $params);
         } else {
-            $params             = \Request::all();
+            $params = \Request::all();
             $params['password'] = $password;
-            $params['url']      = $urlToProxy;
+            $params['url'] = $urlToProxy;
 
             $iframeUrl = action('ProxyController@proxy', $params);
 
@@ -439,7 +439,7 @@ class ProxyController extends Controller
         $dateString = date('D M d H:i:s Y');
 
         $logString = $dateString . "\t" . $targetUrl . "\t" . $ip . "\n";
-        if(file_exists($logFile)){
+        if (file_exists($logFile)) {
             file_put_contents($logFile, $logString, FILE_APPEND);
         }
     }

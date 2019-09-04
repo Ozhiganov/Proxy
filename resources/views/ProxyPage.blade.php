@@ -9,7 +9,6 @@
 	allow-popups
 	allow-top-navigation
 	allow-same-origin
-	allow-scripts
 	"
 >
 

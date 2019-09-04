@@ -1,6 +1,7 @@
 <html>
 <head>
 <meta charset="utf-8" />
+<title>Proxy - MetaGer</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <link href="{{ mix('/css/all.css') }}" rel="stylesheet" type="text/css" />
 </head>

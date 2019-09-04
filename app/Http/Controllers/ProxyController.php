@@ -132,13 +132,14 @@ class ProxyController extends Controller
 
         $targetUrl = str_replace("<<SLASH>>", "/", $url);
         $targetUrl = str_rot13(base64_decode($targetUrl));
+
         $this->password = $password;
         // Hash Value under which a possible cached file would've been stored
         $hash = md5($targetUrl);
         $result = [];
         $httpcode = 200;
 
-        if (!Cache::has($hash)) {
+        if (!Cache::has($hash) || env("CACHE_ENABLED") === false) {
             // Inits the Curl connection for being able to preload multiple URLs while using a keep-alive connection
             $this->initCurl();
             $result = $this->getUrlContent($targetUrl, false);
@@ -320,6 +321,7 @@ class ProxyController extends Controller
 
             $data = substr($data, $header_size);
             $headerArray = [];
+
             foreach (explode(PHP_EOL, $header) as $index => $value) {
                 if ($index > 0) {
                     $ar = explode(': ', $value);
@@ -330,15 +332,13 @@ class ProxyController extends Controller
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
                         } elseif (strtolower($ar[0]) === "location") {
                             $redLink = $ar[1];
-
                             if (strpos($redLink, "/") === 0) {
                                 $parse = parse_url($url);
                                 $redLink = $parse["scheme"] . "://" . $parse["host"] . $redLink;
-                            } else if (preg_match("/\w+\.\w+/si", $redLink)) {
+                            } else if (preg_match("/^\w+\.\w+$/si", $redLink)) {
                                 $parse = parse_url($url);
                                 $redLink = $parse["scheme"] . "://" . $parse["host"] . "/" . $redLink;
                             }
-
                             $headerArray[trim($ar[0])] = $this->proxifyUrl($redLink, null, false);
                         } elseif (strtolower($ar[0]) === "content-disposition") {
                             $headerArray[strtolower(trim($ar[0]))] = strtolower(trim($ar[1]));
